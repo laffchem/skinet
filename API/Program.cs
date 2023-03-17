@@ -1,4 +1,4 @@
-using API.Data.Migrations;
+using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,6 +15,7 @@ builder.Services.AddDbContext<StoreContext>(opt =>
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 
 var app = builder.Build();
 
@@ -32,13 +33,5 @@ app.MapControllers();
 var scope = app.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<StoreContext>();
 var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-try
-{
-    context.Database.Migrate();
-    DbInitializer.Initialize(context);
-}
-catch (Exception ex)
-{
-    logger.LogError(ex, "A problem occurred during migration");
-}
+
 app.Run();
